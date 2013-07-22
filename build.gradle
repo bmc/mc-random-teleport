@@ -1,0 +1,45 @@
+apply plugin: 'scala'
+apply plugin: 'java'
+
+import groovy.io.FileType
+
+defaultTasks 'build'
+//defaultTasks 'compileScala'
+
+repositories {
+    mavenCentral()
+}
+
+def compileLibJars = files(getFiles("lib"), getFiles("package-extras"))
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.10.1'
+    compile compileLibJars
+}
+
+
+FileCollection distPackage = files(getFiles("package-extras"),
+                                   'build/libs/nickname.jar')
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+    scalaCompileOptions.additionalParameters = ["-feature"]
+}
+
+tasks.withType(ScalaCompile) {
+    configure(scalaCompileOptions.forkOptions) {
+        memoryMaximumSize = '1g'
+    }
+}
+
+task zip(type: Zip, dependsOn: 'jar') {
+    from  distPackage
+}
+
+def getFiles(String path) {
+  def dir = new File(path)
+  def list = []
+  dir.eachFileRecurse(FileType.FILES) { file ->
+      list << file
+  }
+  return list
+}
