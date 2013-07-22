@@ -1,10 +1,10 @@
 package org.clapper.minecraft.nickname
 
-import jcdc.pluginfactory.{ScalaPlugin, CommandPlugin, ListenersPlugin}
+import jcdc.pluginfactory.{ScalaPlugin, CommandPlugin, ListenerPlugin, ListenersPlugin}
 import jcdc.pluginfactory.Listeners._
 
 import org.bukkit.event.{EventHandler, Listener}
-import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.{PlayerJoinEvent, PlayerMoveEvent}
 import org.bukkit.entity.Player
 import org.bukkit.metadata.MetadataValue
 import org.bukkit.plugin.Plugin
@@ -52,23 +52,20 @@ case class NicknameMetadata(name: String, plugin: Plugin) extends MetadataValue 
 }
 
 class NicknamePlugin
-  extends CommandPlugin
-  with    ListenersPlugin
+  extends ListenersPlugin
+  with    CommandPlugin
   with    NicknamePermissions {
 
   import Implicits._
 
-  private lazy val logger = java.util.logging.Logger.getLogger(name)
+  private lazy val logger = getLogger()
 
-  // Scala API doesn't provide a listener class for login.
-  val LoginListener = new Listener {
-
-    @EventHandler def onEvent(e: PlayerJoinEvent): Unit = {
-      val player = e.getPlayer
+  val listeners = List(
+    OnPlayerJoin { (player, event) =>
       logMessage(s"${player.name} logged in.")
       player.getMetadata(METADATA_KEY).asScala.toList match {
         case Nil =>
-          logMessage(s"${player.name} has no saved nickname.")
+        logMessage(s"${player.name} has no saved nickname.")
 
         case meta :: whatever =>
           val name = meta.asInstanceOf[MetadataValue].asString
@@ -76,9 +73,7 @@ class NicknamePlugin
           setName(player, Some(name))
       }
     }
-  }
-
-  val listeners = List(LoginListener)
+  )
 
   val command = Command("nk", "Change or show your nickname.", slurp) {
     case (player, name) => {
@@ -107,7 +102,8 @@ class NicknamePlugin
   }
 
   override def onEnable(): Unit = {
-    logMessage("I'm alive!")
+    super.onEnable()
+    logMessage("I'm alive! Foo")
   }
 
   private def setName(player: Player, nameOpt: Option[String]): Unit = {
