@@ -28,12 +28,29 @@ trait NicknameConstants {
   val METADATA_KEY    = "nickname"
 }
 
-trait NicknamePermissions extends NicknameConstants {
+trait Logging {
   self: ScalaPlugin =>
 
-  def permittedToChangeName(player: Player) = {
-    (! player.isPermissionSet(CAN_CHANGE_PERM)) ||
-    player.hasPermission(CAN_CHANGE_PERM)
+  private lazy val logger = getLogger()
+
+  def logMessage(msg: String) = {
+    logger.info(s"[$name] $msg")
+  }
+}
+
+trait NicknamePermissions extends NicknameConstants with Logging {
+  self: ScalaPlugin =>
+
+  def ifPermittedToChangeName(player: Player)(code: => Unit) = {
+    if ((! player.isPermissionSet(CAN_CHANGE_PERM)) ||
+        player.hasPermission(CAN_CHANGE_PERM)) {
+      code
+    }
+
+    else {
+      logMessage(s"Player ${player.name} isn't permitted to change nicknames.")
+      player.sendError("You aren't permitted to change your nickname.")
+    }
   }
 }
 
@@ -54,11 +71,10 @@ case class NicknameMetadata(name: String, plugin: Plugin) extends MetadataValue 
 class NicknamePlugin
   extends ListenersPlugin
   with    CommandPlugin
+  with    Logging
   with    NicknamePermissions {
 
   import Implicits._
-
-  private lazy val logger = getLogger()
 
   val listeners = List(
     OnPlayerJoin { (player, event) =>
@@ -75,30 +91,26 @@ class NicknamePlugin
     }
   )
 
-  val command = Command("nk", "Change or show your nickname.", slurp) {
-    case (player, name) => {
-      val trimmedName = name.trim
-
-      if (! permittedToChangeName(player)) {
-        logMessage(s"Player ${player.name} isn't permitted to change nicknames.")
-        player.sendError("You aren't permitted to change your nickname.")
+  val command = Command("nk", "Change or show your nickname.", nothing or slurp) {
+    case (player, Left(_)) =>
+      ifPermittedToChangeName(player) {
+        player.notice(s"Your current nickname is: ${getName(player)}")
       }
 
-      else if (trimmedName == "-") {
-        setName(player, None)
-        player.notice("Your nickname has been cleared.")
-      }
+    case (player, Right(name)) =>
+      ifPermittedToChangeName(player) {
+        val trimmedName = name.trim
 
-      else if (trimmedName == "") {
-        val currentName = getName(player)
-        player.notice(s"Your current nickname is: $currentName")
-      }
+        if (trimmedName == "-") {
+          setName(player, None)
+          player.notice("Your nickname has been cleared.")
+        }
 
-      else {
-        setName(player, Some(trimmedName))
-        player.notice(s"Your nickname is now: $trimmedName")
+        else {
+          setName(player, Some(trimmedName))
+          player.notice(s"Your nickname is now: $trimmedName")
+        }
       }
-    }
   }
 
   override def onEnable(): Unit = {
@@ -121,8 +133,4 @@ class NicknamePlugin
   }
 
   private def getName(player: Player) = player.getDisplayName
-
-  private def logMessage(msg: String) = {
-    logger.info(s"[$name] $msg")
-  }
 }
