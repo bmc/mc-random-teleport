@@ -84,23 +84,3 @@ file explain what each configuration item does.
 The plugin currently doesn't support any permissions. It's either on or off.
 If the plugin is enabled, any user can use it. Adding permissions is a future
 enhancement.
-
-# Permissions
-
-It's not necessary to set permissions, because the plugin assumes
-reasonable defaults. However, if you're using a permissions plugin such
-as [Essentials Group Manager](http://wiki.ess3.net/wiki/Group_Manager),
-you can control which users are permitted to change their nicknames.
-
-The plugin supports the following permission:
-
-- `nickname.canchange`: Set to `true` or `false`, to enable or disable
-  the ability to change the nickname. Default, if not set: `true`
-
-## Commands
-
-Supports the following in-game chat commands:
-
-`nickname name` sets a new nickname.
-`nickname` (without arguments) shows your nickname.
-`nickname -` disables your nickname.
