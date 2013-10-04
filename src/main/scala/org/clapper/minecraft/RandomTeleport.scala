@@ -7,7 +7,7 @@ import org.clapper.minecraft.lib.Implicits.Player._
 import org.clapper.minecraft.lib.Implicits.Logging._
 import org.clapper.minecraft.lib.Implicits.Block._
 import org.clapper.minecraft.lib.Listeners._
-import org.clapper.minecraft.lib.PluginLogging
+import org.clapper.minecraft.lib.{PluginLogging, LocationUtil}
 
 import org.bukkit.entity.Player
 import org.bukkit.block.Block
@@ -59,7 +59,6 @@ class RandomTeleportPlugin
   random.nextInt()
 
   private lazy val configuration = ConfigData(this)
-  private lazy val locationUtil  = new LocationUtil(this.logger)
 
   val listeners = List(
     OnPlayerJoin { (player, event) =>
@@ -105,7 +104,7 @@ class RandomTeleportPlugin
                                      randomCoordinate(min, max),
                                      player.loc.getYaw,
                                      player.loc.getPitch)
-        val loc1 = locationUtil.findSafeLocationFrom(randomLoc)
+        val loc1 = LocationUtil.findSafeLocationFrom(randomLoc)
 
         val succeeded = player.teleport(loc1)
         if (! succeeded) {

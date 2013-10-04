@@ -20,7 +20,7 @@ repositories {
   }
 }
 
-ext.mclibVersion = "0.4"
+ext.mclibVersion = "0.5"
 ext.version = "0.2"
 
 dependencies {
