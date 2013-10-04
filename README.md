@@ -8,7 +8,7 @@ There are other, similar, plugins already out there, including:
 * [Teleport Random Location](http://dev.bukkit.org/bukkit-plugins/teleport-random-location/)
 * [Random Location Teleporter](http://dev.bukkit.org/bukkit-plugins/randomlocationteleporter/)
 
-So, why implement yet another one? Two reasons, primarily:
+So, why implement yet another one? Several reasons:
 
 * I don't like the apparent lack of real randomness in the other plugins.
   (They revisit the same areas too often.) This plugin attempts to be
