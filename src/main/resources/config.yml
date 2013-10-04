@@ -1,1 +1,20 @@
-# Configuration
+# Configuration for RandomTeleport
+
+# Maximum coordinate (integer). RandomTeleport ensures that its randomly
+# select x and z coordinates don't exceed this value.
+max: 10000
+
+# Minimum coordinate (integer). RandomTeleport ensures that its randomly
+# select x and z coordinates aren't less than this value.
+min: -10000
+
+# Maximum number of times to try to teleport someone before giving up.
+# RandomTeleport will try "maxAttempts" random locations, one after another,
+# stopping at the first suitable location. ("Suitable" means "a non-lava,
+# non-water, non-air" block.) If it fails to find a suitable location after
+# "maxAttempts" tries, RandomTeleport will give up and not teleport the user.
+maxAttempts: 30
+
+# Cool-down period: The minimum time between teleports, expressed in seconds.
+# Each user has a separate cool-down period.
+timeBetweenTeleports: 120 # two minutes

@@ -71,7 +71,7 @@ task zipCleanup(type: Delete) {
 }
 
 task zipJars(type: Zip) {
-  archiveName "mc-endless-dispenser-${project.ext.version}.zip"
+  archiveName "mc-random-teleport-${project.ext.version}.zip"
   includeEmptyDirs false
   finalizedBy 'zipCleanup'
 
@@ -86,9 +86,21 @@ task zipJars(type: Zip) {
 
   into "/mc-random-teleport"
 }
+jar {
+  manifest {
+    def manifestCP = ['../lib/mclib.jar',
+                      '../lib/scala-library-2.10.2.jar',
+                      'scala-minecraft-scala-library-2.10-0.3.2.jar',
+                      'scala-minecraft-plugin-api_2.10-0.3.2.jar',
+                      '../craftbukkit.jar']
+    attributes 'Class-Path': manifestCP.join(" ")
+    baseName = "RandomTeleport"
+  }
+}
 
 // See http://sethrylan.org/2013/07/02/scala-gradle-scalaconsole.html
 
 scalaConsole.dependsOn(build)
 scalaConsole.classpath += sourceSets.main.output
 task console(dependsOn: "scalaConsole")
+
