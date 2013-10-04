@@ -10,8 +10,8 @@ min: -10000
 
 # Maximum number of times to try to teleport someone before giving up.
 # RandomTeleport will try "maxAttempts" random locations, one after another,
-# stopping at the first suitable location. ("Suitable" means "a non-lava,
-# non-water, non-air" block.) If it fails to find a suitable location after
+# stopping at the first suitable loc. ("Suitable" means "a non-lava,
+# non-water, non-air" block.) If it fails to find a suitable loc after
 # "maxAttempts" tries, RandomTeleport will give up and not teleport the user.
 maxAttempts: 30
 

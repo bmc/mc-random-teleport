@@ -1,19 +1,19 @@
 package org.clapper.minecraft.randomteleport
 
 import com.joshcough.minecraft.{ScalaPlugin, CommandPlugin, ListenersPlugin}
+import com.joshcough.minecraft.BukkitEnrichment._
 
 import org.clapper.minecraft.lib.Implicits.Player._
 import org.clapper.minecraft.lib.Implicits.Logging._
 import org.clapper.minecraft.lib.Implicits.Block._
 import org.clapper.minecraft.lib.Listeners._
-import org.clapper.minecraft.lib.{PluginLogging, ScalaPluginExtras}
+import org.clapper.minecraft.lib.PluginLogging
 
 import org.bukkit.entity.Player
 import org.bukkit.block.Block
-import org.bukkit.World
 import org.bukkit.metadata.MetadataValue
 import org.bukkit.plugin.Plugin
-import org.bukkit.{Material, Location}
+import org.bukkit.{Material, Location, World}
 
 import scala.language.implicitConversions
 import scala.annotation.tailrec
@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 import java.security.SecureRandom
 
 private object Constants {
-  val HeightDelta         = 10 // location ok if lower than (max height - this)
+  val HeightDelta         = 10 // loc ok if lower than (max height - this)
   val LastTimeMetadataKey = "last-random-teleport-time"
   val CanRandomlyTeleport = "rp.teleport"
   val DefaultElapsedTime  = 60 * 60 * 1000 // 1 hour in milliseconds
@@ -59,6 +59,7 @@ class RandomTeleportPlugin
   random.nextInt()
 
   private lazy val configuration = ConfigData(this)
+  private lazy val locationUtil  = new LocationUtil(this.logger)
 
   val listeners = List(
     OnPlayerJoin { (player, event) =>
@@ -97,37 +98,25 @@ class RandomTeleportPlugin
                           configuration.MaxCoordinate)
         val x     = randomCoordinate(min, max)
         val z     = randomCoordinate(min, max)
-        val world = player.world
-        val block = highestNonAirBlock(world, x, z)
-        val loc   = block.loc
-        val y     = loc.y.toInt
-        logDebug(s"Highest block at ${block.loc.x}, ${block.loc.z} is $block")
+        val y     = Math.max(world.getMaxHeight, 512)
+        val randomLoc = new Location(world,
+                                     randomCoordinate(min, max),
+                                     player.loc.y,
+                                     randomCoordinate(min, max),
+                                     player.loc.getYaw,
+                                     player.loc.getPitch)
+        val loc1 = locationUtil.findSafeLocationFrom(randomLoc)
 
-        val succeeded = if (landingPointOkay(block, world.getMaxHeight - 10)) {
-          // Teleport one above the location.
-          val newLoc = new Location(world,
-                                    loc.x.toDouble,
-                                    (loc.y + 1).toDouble,
-                                    loc.z.toDouble)
-          val ok = player.teleport(newLoc)
-          if (! ok)
-            logMessage("Failed to teleport player ${player.name} to ($x, $z)")
-          else
-            player.setMetadata(Constants.LastTimeMetadataKey,
-                               RTPMetaData(now.toString, this))
-          ok
-        }
-
-        else {
-          logDebug { s"Can't teleport player to (x=$x, y=$y, z=$z): " +
-                     s"Block ${block} isn't a suitable location." }
-          false
-        }
-
-        if (! succeeded)
+        val succeeded = player.teleport(loc1)
+        if (! succeeded) {
+          logMessage(s"Failed to teleport player ${player.name} to ($x, $z)")
           successfullyTeleported(i + 1)
-        else
-          succeeded
+        }
+        else {
+          player.setMetadata(Constants.LastTimeMetadataKey,
+                             RTPMetaData(now.toString, this))
+          true
+        }
       }
     }
 
@@ -135,9 +124,13 @@ class RandomTeleportPlugin
     val elapsed = now - lastTeleported
     logDebug(s"timeBetween=${configuration.TimeBetweenTeleports}, elapsed=${elapsed}, last=${lastTeleported}, now=${now}")
     if (elapsed < configuration.TimeBetweenTeleports) {
-      val left = (configuration.TimeBetweenTeleports - elapsed) / 1000
-      val sec  = if (left == 1) "second" else "seconds"
-      player.notice(s"You can't teleport for another $left ${sec}.")
+      val left = (configuration.TimeBetweenTeleports - elapsed)
+      val leftSeconds = (left / 1000) + (
+        // Round up if there's ANY remainder.
+        if ((left % 1000) > 0) 1 else 0
+        )
+      val humanLeft = if (leftSeconds == 1) "a second" else s"another $leftSeconds seconds"
+      player.notice(s"You can't teleport for $humanLeft.")
     }
 
     else {
@@ -148,31 +141,6 @@ class RandomTeleportPlugin
         player.sendRawMessage(s"You have been teleported to $sLoc")
       }
     }
-  }
-
-  private def highestNonAirBlock(world: World, x: Int, z: Int): Block = {
-
-    @tailrec def findNonAirBlock(y: Int): Block = {
-      val block = world.blockAt(x, y, z)
-      if (block.getType != Material.AIR)
-        block
-      else
-        findNonAirBlock(y - 1)
-    }
-
-    findNonAirBlock(world.getHighestBlockYAt(x, z))
-  }
-
-  private def landingPointOkay(block: Block, maxElevation: Int): Boolean = {
-    (block.loc.y.toInt < maxElevation) && (blockOkay(block))
-  }
-
-  private def blockOkay(block: Block): Boolean = {
-    (block.getType != Material.WATER) &&
-    (block.getType != Material.STATIONARY_WATER) &&
-    (block.getType != Material.LAVA) &&
-    (block.getType != Material.STATIONARY_LAVA) &&
-    (block.getType != Material.FIRE)
   }
 
   private def lastRandomTeleportTime(player: Player) = {

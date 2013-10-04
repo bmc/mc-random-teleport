@@ -5,7 +5,7 @@ There are other, similar, plugins already out there, including:
 
 * [RandomPort](http://dev.bukkit.org/bukkit-plugins/randomport/)
 * [Random Teleport](http://dev.bukkit.org/bukkit-plugins/random-teleport/)
-* [Teleport Random Location](http://dev.bukkit.org/bukkit-plugins/teleport-random-location/)
+* [Teleport Random Location](http://dev.bukkit.org/bukkit-plugins/teleport-random-loc/)
 * [Random Location Teleporter](http://dev.bukkit.org/bukkit-plugins/randomlocationteleporter/)
 
 So, why implement yet another one? Several reasons:
@@ -13,6 +13,8 @@ So, why implement yet another one? Several reasons:
 * I don't like the apparent lack of real randomness in the other plugins.
   (They revisit the same areas too often.) This plugin attempts to be
   more random in its choices of locations.
+* This version takes a bit of extra care to try to avoid teleporting the
+  player inside a wall.
 * Guaranteed access to the source code. The source to this version is
   easy to find and will be available as long as the plugin is around.
 * It serves as a reasonable template for other plugins.
@@ -57,7 +59,7 @@ Then, restart or reload your Bukkit server.
 ## Commands
 
 The plugin provides an in-game `/rp` chat command. When invoked, the plugin
-randomly chooses a location within the user's current world and teleports
+randomly chooses a loc within the user's current world and teleports
 the user to that world.
 
 ## Cool-down period
@@ -71,7 +73,7 @@ a configurable number of seconds. (See **Configuration**, below.)
 A user will never be randomly teleported into water, lava, or air. The
 plugin randomly chooses _x_ and _z_ coordinates within the current world.
 It then selects the _y_ (elevation) coordinate corresponding to the topmost
-non-air block at that (_x_, _z_) location.
+non-air block at that (_x_, _z_) loc.
 
 ## Configuration
 
