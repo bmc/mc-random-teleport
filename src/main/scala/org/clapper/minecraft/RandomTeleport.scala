@@ -101,7 +101,7 @@ class RandomTeleportPlugin
         val block = highestNonAirBlock(world, x, z)
         val loc   = block.loc
         val y     = loc.y.toInt
-        logMessage(s"Highest block at ${block.loc.x}, ${block.loc.z} is $block")
+        logDebug(s"Highest block at ${block.loc.x}, ${block.loc.z} is $block")
 
         val succeeded = if (landingPointOkay(block, world.getMaxHeight - 10)) {
           // Teleport one above the location.
@@ -119,8 +119,8 @@ class RandomTeleportPlugin
         }
 
         else {
-          logMessage(s"Can't teleport player to (x=$x, y=$y, z=$z): " +
-                     s"Block ${block} isn't a suitable location.")
+          logDebug { s"Can't teleport player to (x=$x, y=$y, z=$z): " +
+                     s"Block ${block} isn't a suitable location." }
           false
         }
 
@@ -133,7 +133,7 @@ class RandomTeleportPlugin
 
     val lastTeleported = lastRandomTeleportTime(player)
     val elapsed = now - lastTeleported
-    logMessage(s"timeBetween=${configuration.TimeBetweenTeleports}, elapsed=${elapsed}, last=${lastTeleported}, now=${now}")
+    logDebug(s"timeBetween=${configuration.TimeBetweenTeleports}, elapsed=${elapsed}, last=${lastTeleported}, now=${now}")
     if (elapsed < configuration.TimeBetweenTeleports) {
       val left = (configuration.TimeBetweenTeleports - elapsed) / 1000
       val sec  = if (left == 1) "second" else "seconds"
