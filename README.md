@@ -10,6 +10,9 @@ There are other, similar, plugins already out there, including:
 
 So, why implement yet another one? Two reasons, primarily:
 
+* I don't like the apparent lack of real randomness in the other plugins.
+  (They revisit the same areas too often.) This plugin attempts to be
+  more random in its choices of locations.
 * Guaranteed access to the source code. The source to this version is
   easy to find and will be available as long as the plugin is around.
 * It serves as a reasonable template for other plugins.
