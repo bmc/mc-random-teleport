@@ -7,36 +7,84 @@ defaultTasks 'build'
 //defaultTasks 'compileScala'
 
 repositories {
-    mavenCentral()
+  mavenCentral()
+  mavenLocal()
+  maven {
+    url "http://repo.bukkit.org/content/repositories/snapshots/"
+  }
+  maven {
+    url "http://maven.clapper.org/"
+  }
+  maven {
+    url "http://dl.bintray.com/joshcough/maven/"
+  }
 }
 
-def compileLibJars = files(getFiles("lib"), getFiles("package-extras"))
-
-// See http://sethrylan.org/2013/07/02/scala-gradle-scalaconsole.html
+ext.mclibVersion = "0.4"
+ext.version = "0.1"
 
 dependencies {
-    runtime "org.scala-lang:scala-library:2.10.2"
-    runtime "org.scala-lang:jline:2.10.2"
-    compile "org.scala-lang:scala-compiler:2.10.2"
-    compile compileLibJars
+  runtime "org.scala-lang:scala-library:2.10.2"
+  compile "org.scala-lang:scala-compiler:2.10.2"
+  // When calling anything directly on the Bukkit object, the Servlet API
+  // is (often) required to avoid weird compilation errors related to a
+  // stub version included in the Bukket jar.
+  compile "javax.servlet:servlet-api:2.5"
+  compile "org.bukkit:bukkit:1.6.4-R0.1-SNAPSHOT"
+  compile "org.bukkit:craftbukkit:1.6.4-R0.1-SNAPSHOT"
+  compile "org.clapper.minecraft:mclib:${ext.mclibVersion}"
+  compile "com.joshcough:scala-minecraft-plugin-api_2.10:0.3.2"
+
+  runtime("com.joshcough:scala-minecraft-plugin-api_2.10:0.3.2") {
+    transitive = false
+  }
+  runtime("com.joshcough:scala-minecraft-scala-library_2.10:0.3.2") {
+    transitive = false
+  }
+  runtime("org.clapper.minecraft:mclib:${ext.mclibVersion}") {
+    transitive = false
+  }
 }
 
 
-FileCollection distPackage = files(getFiles("package-extras"),
-                                   'build/libs/nickname.jar')
 tasks.withType(ScalaCompile) {
-    scalaCompileOptions.useAnt = false
-    scalaCompileOptions.additionalParameters = ["-feature"]
+  scalaCompileOptions.useAnt = false
+  scalaCompileOptions.additionalParameters = ["-feature"]
+
+  configure(scalaCompileOptions.forkOptions) {
+    memoryMaximumSize = '1g'
+  }
 }
 
-tasks.withType(ScalaCompile) {
-    configure(scalaCompileOptions.forkOptions) {
-        memoryMaximumSize = '1g'
-    }
+task zip(dependsOn: ['zipCopy', 'zipJars'])
+
+task zipCopy(type: Copy, dependsOn: 'jar') {
+  from fileTree('build/libs') {
+    include "*.jar"
+  }
+  from configurations.runtime.files
+  into 'build/zipcopy'
 }
 
-task zip(type: Zip, dependsOn: 'jar') {
-    from  distPackage
+task zipCleanup(type: Delete) {
+  delete 'build/zipcopy'
+}
+
+task zipJars(type: Zip) {
+  archiveName "mc-endless-dispenser-${project.ext.version}.zip"
+  includeEmptyDirs false
+  finalizedBy 'zipCleanup'
+
+  destinationDir file("build/distributions")
+
+  from fileTree('build/zipcopy') {
+    include "mclib*.jar"
+    include "scala-library*.jar"
+    include "RandomTeleport*.jar"
+    include "scala-minecraft-plugin-api*.jar"
+  }
+
+  into "/mc-random-teleport"
 }
 
 // See http://sethrylan.org/2013/07/02/scala-gradle-scalaconsole.html
@@ -44,12 +92,3 @@ task zip(type: Zip, dependsOn: 'jar') {
 scalaConsole.dependsOn(build)
 scalaConsole.classpath += sourceSets.main.output
 task console(dependsOn: "scalaConsole")
-
-def getFiles(String path) {
-  def dir = new File(path)
-  def list = []
-  dir.eachFileRecurse(FileType.FILES) { file ->
-      list << file
-  }
-  return list
-}

@@ -1,9 +1,10 @@
-name: Nickname
-main: org.clapper.minecraft.nickname.NicknamePlugin
+name: RandomTeleport
+main: org.clapper.minecraft.randomteleport.RandomTeleportPlugin
 author: "Brian M. Clapper"
 version: 0.01
 depend: [ScalaLibPlugin]
+load: "POSTWORLD"
 commands:
-  nk:
-    description: "Change or show the nickname you have on the server."
-    usage: "Usage: /nk [name]"
+  rp:
+    description: "Randomly teleport somewhere in the current world"
+    usage: "Usage: /rp"

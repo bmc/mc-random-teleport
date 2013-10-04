@@ -1,3 +1,5 @@
 .envrc
-.gradle
 build
+.idea
+.gradle
+*.iml
