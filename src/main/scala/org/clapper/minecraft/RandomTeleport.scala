@@ -6,8 +6,10 @@ import com.joshcough.minecraft.BukkitEnrichment._
 import org.clapper.minecraft.lib.Implicits.Player._
 import org.clapper.minecraft.lib.Implicits.Logging._
 import org.clapper.minecraft.lib.Implicits.Block._
+import org.clapper.minecraft.lib.Implicits.World._
+import org.clapper.minecraft.lib.Implicits.Location._
 import org.clapper.minecraft.lib.Listeners._
-import org.clapper.minecraft.lib.{PluginLogging, LocationUtil}
+import org.clapper.minecraft.lib.{BlockUtil, PluginLogging, LocationUtil}
 
 import org.bukkit.entity.Player
 import org.bukkit.block.Block
@@ -18,20 +20,28 @@ import org.bukkit.{Material, Location, World}
 import scala.language.implicitConversions
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+import scala.util.Random
 
 import java.security.SecureRandom
 
 private object Constants {
-  val HeightDelta         = 10 // loc ok if lower than (max height - this)
-  val LastTimeMetadataKey = "last-random-teleport-time"
-  val CanRandomlyTeleport = "rp.teleport"
-  val DefaultElapsedTime  = 60 * 60 * 1000 // 1 hour in milliseconds
+  val HeightDelta           = 10 // loc ok if lower than (max height - this)
+  val LastTimeMetadataKey   = "last-random-teleport-time"
+  val CanRandomlyTeleport   = "rp.teleport"
+  val DefaultElapsedTime    = 60 * 60 * 1000 // 1 hour in milliseconds
+  val TotalCoordinatesToTry = 20
 }
 
 private object Permissions {
   def canRandomlyTeleport(player: Player): Boolean = {
     true
   }
+}
+
+private case class Coordinate(x: Int, y: Int, z: Int) {
+  def toLocation(world: World) = new Location(world, x, y, z)
+
+  override def toString = s"($x, $y, $z)"
 }
 
 private case class RTPMetaData(name: String, plugin: Plugin) extends MetadataValue {
@@ -85,61 +95,81 @@ class RandomTeleportPlugin
     val world = player.world
     val now   = System.currentTimeMillis
 
-    @tailrec def successfullyTeleported(i: Int): Boolean = {
-      if (i >= configuration.MaxAttempts) {
-        logMessage(s"Failed to teleport ${player.name} after ${i} attempts.")
-        player.sendError(s"Unable to teleport you after ${i} attempts.")
-        false
-      }
-
-      else {
-        val (min, max) = (configuration.MinCoordinate,
-                          configuration.MaxCoordinate)
-        val x     = randomCoordinate(min, max)
-        val z     = randomCoordinate(min, max)
-        val y     = Math.max(world.getMaxHeight, 512)
-        val randomLoc = new Location(world,
-                                     randomCoordinate(min, max),
-                                     player.loc.y,
-                                     randomCoordinate(min, max),
-                                     player.loc.getYaw,
-                                     player.loc.getPitch)
-        val loc1 = LocationUtil.findSafeLocationFrom(randomLoc)
-
-        val succeeded = player.teleport(loc1)
-        if (! succeeded) {
-          logMessage(s"Failed to teleport player ${player.name} to ($x, $z)")
-          successfullyTeleported(i + 1)
-        }
-        else {
-          player.setMetadata(Constants.LastTimeMetadataKey,
-                             RTPMetaData(now.toString, this))
-          true
-        }
-      }
-    }
-
     val lastTeleported = lastRandomTeleportTime(player)
     val elapsed = now - lastTeleported
-    logDebug(s"timeBetween=${configuration.TimeBetweenTeleports}, elapsed=${elapsed}, last=${lastTeleported}, now=${now}")
+    logMessage(s"timeBetween=${configuration.TimeBetweenTeleports}, elapsed=${elapsed}, last=${lastTeleported}, now=${now}")
     if (elapsed < configuration.TimeBetweenTeleports) {
       val left = (configuration.TimeBetweenTeleports - elapsed)
-      val leftSeconds = (left / 1000) + (
+      val leftSecs = (left / 1000) + (
         // Round up if there's ANY remainder.
         if ((left % 1000) > 0) 1 else 0
         )
-      val humanLeft = if (leftSeconds == 1) "a second" else s"another $leftSeconds seconds"
-      player.notice(s"You can't teleport for $humanLeft.")
+      val humanLeft = if (leftSecs == 1) "a second" else s"another $leftSecs seconds"
+      player.notice(s"You can't randomly teleport for $humanLeft.")
+    }
+
+    else if (randomlyTeleport(world, player)) {
+      val loc = player.loc
+      val sLoc = s"(${loc.x}, ${loc.y}, ${loc.z})"
+      logMessage(s"Teleported ${player.name} to $sLoc")
+      player.sendRawMessage(s"You have been teleported to ${sLoc}.")
+      player.setMetadata(Constants.LastTimeMetadataKey,
+                         RTPMetaData(now.toString, this))
     }
 
     else {
-      if (successfullyTeleported(0)) {
-        val loc = player.loc
-        val sLoc = s"(${loc.x}, ${loc.y}, ${loc.z})"
-        logMessage(s"Teleported ${player.name} to $sLoc")
-        player.sendRawMessage(s"You have been teleported to $sLoc")
+      logMessage(s"Failed to teleport player ${player.name}.")
+      player.sendError("Sorry, we are unable to teleport you at this time.")
+    }
+  }
+
+  private def randomlyTeleport(world: World, player: Player): Boolean = {
+    val (min, max) = (configuration.MinCoordinate,
+                      configuration.MaxCoordinate)
+
+    // Select N random coordinates. Then, weed out the ones whose highest
+    // blocks are water. If there are any left, use one of them. Otherwise,
+    // randomly select one of the water ones and find a nearby safe
+    // location.
+    //
+    // This strategy is intended to lower the probability of ending up
+    // in a cave (i.e., raise the probability of landing above ground).
+
+    val coordinates = (1 to Constants.TotalCoordinatesToTry).map { i =>
+      val x = randomCoordinate(min, max)
+      val z = randomCoordinate(min, max)
+      val y = world.highestNonAirBlockYAt(x, z)
+      Coordinate(x, y, z)
+    }.
+    toList
+
+    val nonWaterCoordinates = coordinates.filter { c =>
+      ! BlockUtil.isWaterType(world.blockAt(c.x, c.y, c.z).material)
+    }
+
+    logMessage(s"Total non-water coordinates: ${nonWaterCoordinates.length}")
+    val coordinate = nonWaterCoordinates match {
+      case Nil => {
+        // No non-water locations. Take one of the locations and find
+        // a safe place nearby.
+        Random.shuffle(coordinates).head
+      }
+
+      case head :: Nil => {
+        // Only one non-water location. Just use it. Be safe, though.
+        head
+      }
+
+      case head :: rest => {
+        // Many of them. Choose one at random.
+        Random.shuffle(nonWaterCoordinates).head
       }
     }
+
+    logMessage(s"Finding safe location from ${coordinate} (${world.blockAt(coordinate.x, coordinate.y, coordinate.z)})")
+    val loc = LocationUtil.findSafeLocationFrom(coordinate.toLocation(world))
+
+    player.teleport(loc)
   }
 
   private def lastRandomTeleportTime(player: Player) = {
