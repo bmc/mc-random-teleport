@@ -1,3 +1,5 @@
+# RandomTeleport
+
 RandomTeleport is yet another Minecraft Bukkit server plugin that allows
 users to teleport somewhere randomly within the current world.
 
@@ -22,7 +24,44 @@ So, why implement yet another one? Several reasons:
 This plugin is written in Scala and uses Josh Cough's
 [Scala Bukkit plugin API](https://github.com/joshcough/MinecraftPlugins).
 
-# Getting the Plugin
+## In-game Usage
+
+The plugin provides an in-game `/rp` chat command. When  you type `/rp`, the plugin
+randomly chooses a location within your current world and teleports you to that
+location.
+
+You will never be randomly teleported into water, lava, or air. The plugin takes
+great pains not to teleport you inside a solid block. However, it's entirely
+possible that you will be teleported to a location underground. It's a good idea
+to have torches ready, since you might be teleported to a place that has
+no ambient light.
+
+## Administration
+
+### Configuration
+
+#### Cool-down period
+
+The avoid an excessive chunk-loading drain on the server, the plugin supports
+a cool-down period. After a user uses `/rp`, he or she can't use it again for
+a configurable number of seconds. (See **Configuration**, below.)
+
+#### Changing the Configuration
+
+Configuration is self-explanatory. When the plugin comes up, it creates
+a `plugins/RandomTeleport` directory, if that directory doesn't exist. If
+you want to override the default configuration, download a copy of
+`src/main/resources/config.yml` from this repo, edit it, install it in that
+directory, and restart or reload your server. The comments in the `config.yml`
+file explain what each configuration item does.
+
+## Plugin Permissions
+
+The plugin currently doesn't support any permissions. It's either on or off.
+If the plugin is enabled, any user can use it. Adding permissions is a future
+enhancement.
+
+## Getting the Plugin
 
 Currently, the only way to get the plugin is to build it from source. To do
 that, you'll need the following:
@@ -30,14 +69,14 @@ that, you'll need the following:
 * A Java JDK (preferably Java 7).
 * A recent version of [Gradle](http://gradle.org).
 
-## Building the Plugin
+### Building the Plugin
 
 * Check out the repo.
 * Run: `gradle zip`
 * The resulting distribution is in `build/distributions/mc-random-teleport-VERSION.zip`,
   where `VERSION` is the current version of the plugin.
 
-## Installing the Plugin
+### Installing the Plugin
 
 Unpack the zip file you built above.  Unzipping will result in an
 `mc-random-teleport` subdirectory containing numerous jar files. Assuming the
@@ -53,39 +92,3 @@ commands from a [Cygwin](http://www.cygwin.com/) shell.)
     $ cp scala-minecraft-plugin-api*.jar RandomTeleport.jar $WORLD/plugins
 
 Then, restart or reload your Bukkit server.
-
-# Configuration
-
-## Commands
-
-The plugin provides an in-game `/rp` chat command. When invoked, the plugin
-randomly chooses a loc within the user's current world and teleports
-the user to that world.
-
-## Cool-down period
-
-The avoid an excessive chunk-loading drain on the server, the plugin supports
-a cool-down period. After a user uses `/rp`, he or she can't use it again for
-a configurable number of seconds. (See **Configuration**, below.)
-
-## Placement
-
-A user will never be randomly teleported into water, lava, or air. The
-plugin randomly chooses _x_ and _z_ coordinates within the current world.
-It then selects the _y_ (elevation) coordinate corresponding to the topmost
-non-air block at that (_x_, _z_) loc.
-
-## Configuration
-
-Configuration is self-explanatory. When the plugin comes up, it creates
-a `plugins/RandomTeleport` directory, if that directory doesn't exist. If
-you want to override the default configuration, download a copy of
-`src/main/resources/config.yml` from this repo, edit it, install it in that
-directory, and restart or reload your server. The comments in the `config.yml`
-file explain what each configuration item does.
-
-## Plugin Permissions
-
-The plugin currently doesn't support any permissions. It's either on or off.
-If the plugin is enabled, any user can use it. Adding permissions is a future
-enhancement.
