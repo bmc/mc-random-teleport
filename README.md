@@ -55,7 +55,7 @@ you want to override the default configuration, download a copy of
 directory, and restart or reload your server. The comments in the `config.yml`
 file explain what each configuration item does.
 
-## Plugin Permissions
+### Plugin Permissions
 
 The plugin uses [Vault][] to manage its permissions, which means it's
 compatible with all the permissions subsystems supported by Vault. Currently,
