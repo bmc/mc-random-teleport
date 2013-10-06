@@ -57,9 +57,11 @@ file explain what each configuration item does.
 
 ## Plugin Permissions
 
-The plugin currently doesn't support any permissions. It's either on or off.
-If the plugin is enabled, any user can use it. Adding permissions is a future
-enhancement.
+The plugin uses [Vault][] to manage its permissions, which means it's
+compatible with all the permissions subsystems supported by Vault. Currently,
+there's only one permission, `RandomTeleport.rp`. If a player has that permission,
+he or she can randomly teleport. If the permission is missing, it defaults to
+"off".
 
 ## Getting the Plugin
 
@@ -91,4 +93,9 @@ commands from a [Cygwin](http://www.cygwin.com/) shell.)
     $ cp mclib*.jar $WORLD/lib/mclib.jar
     $ cp scala-minecraft-plugin-api*.jar RandomTeleport.jar $WORLD/plugins
 
+This plugin also relies on the [Vault][] plugin; you will need to install
+Vault separately.
+
 Then, restart or reload your Bukkit server.
+
+[Vault]: http://dev.bukkit.org/bukkit-plugins/vault/

@@ -21,7 +21,7 @@ repositories {
 }
 
 ext.mclibVersion = "0.6"
-ext.version = "0.3"
+ext.version = "0.4"
 
 dependencies {
   runtime "org.scala-lang:scala-library:2.10.2"

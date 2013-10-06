@@ -1,7 +1,7 @@
 name: RandomTeleport
 main: org.clapper.minecraft.randomteleport.RandomTeleportPlugin
 author: "Brian M. Clapper"
-version: 0.2
+version: 0.4
 depend: [ScalaLibPlugin]
 load: "POSTWORLD"
 commands:

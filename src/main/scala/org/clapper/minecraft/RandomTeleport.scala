@@ -9,16 +9,14 @@ import org.clapper.minecraft.lib.Implicits.Block._
 import org.clapper.minecraft.lib.Implicits.World._
 import org.clapper.minecraft.lib.Implicits.Location._
 import org.clapper.minecraft.lib.Listeners._
-import org.clapper.minecraft.lib.{BlockUtil, PluginLogging, LocationUtil}
+import org.clapper.minecraft.lib.{PermissionUtil, BlockUtil, PluginLogging, LocationUtil}
 
 import org.bukkit.entity.Player
-import org.bukkit.block.Block
 import org.bukkit.metadata.MetadataValue
 import org.bukkit.plugin.Plugin
 import org.bukkit.{Material, Location, World}
 
 import scala.language.implicitConversions
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.util.Random
 
@@ -78,17 +76,34 @@ class RandomTeleportPlugin
 
   val command = Command("rp", "Randomly teleport in the world") { case player =>
     if (Permissions.canRandomlyTeleport(player)) {
-      teleport(player)
+      teleportIfAllowed(player)
     }
   }
 
   override def onEnable(): Unit = {
+    import scala.util.{Failure => TryFailure, Success => TrySuccess}
+
     super.onEnable()
     val dataDirectory = this.getDataFolder
     if (! dataDirectory.exists) {
       logMessage(s"Creating $dataDirectory")
       dataDirectory.mkdirs()
     }
+
+    PermissionUtil.initialize(this) match {
+      case TrySuccess(_) => logMessage("Initialized permissions.")
+      case TryFailure(ex) => {
+        logError("Failed to initialize permissions. Disabling myself.", ex)
+        server.getPluginManager.disablePlugin(this)
+      }
+    }
+  }
+
+  private def teleportIfAllowed(player: Player) {
+    if (PermissionUtil.playerHasPerm(player, "RandomTeleport.rp"))
+      teleport(player)
+    else
+      player.sendError("You aren't permitted to use that command.")
   }
 
   private def teleport(player: Player) {
