@@ -1,0 +1,7 @@
+# Generated @genTime@
+name: @name@
+main: @class@
+author: "@author@"
+version: @version@
+depend: [ScalaLibPlugin]
+load: "POSTWORLD"

@@ -2,6 +2,7 @@ apply plugin: 'scala'
 apply plugin: 'java'
 
 import groovy.io.FileType
+import org.apache.tools.ant.filters.ReplaceTokens
 
 defaultTasks 'build'
 //defaultTasks 'compileScala'
@@ -20,8 +21,13 @@ repositories {
   }
 }
 
+ext.author       = "Brian M. Clapper"
+ext.pluginName   = "RandomTeleport"
+ext.pluginClass  = "org.clapper.minecraft.randomteleport.RandomTeleportPlugin"
+ext.version      = "0.4"
+ext.pluginYaml   = "src/main/resources/plugin.yml"
+
 ext.mclibVersion = "0.6"
-ext.version = "0.4"
 
 dependencies {
   runtime "org.scala-lang:scala-library:2.10.2"
@@ -53,6 +59,12 @@ tasks.withType(ScalaCompile) {
   configure(scalaCompileOptions.forkOptions) {
     memoryMaximumSize = '1g'
   }
+}
+
+clean.dependsOn('localClean')
+
+task localClean(type: Delete) {
+  delete project.ext.pluginYaml
 }
 
 task zip(dependsOn: ['zipCopy', 'zipJars'])
@@ -89,6 +101,22 @@ task zipJars(type: Zip) {
 task wrapper(type: Wrapper) {
   gradleVersion = '1.8'
 }
+
+task createPluginYaml(type: Copy) {
+  from("templates") {
+    include "plugin.yml"
+  }
+  into 'src/main/resources'
+  filter(ReplaceTokens, tokens: [
+    version: project.ext.version,
+    name:    project.ext.pluginName,
+    class:   project.ext.pluginClass,
+    genTime: new Date().format("yyyy/MM/dd HH:mm:ss"),
+    author:  project.ext.author
+  ])
+}
+
+jar.dependsOn('createPluginYaml')
 
 jar {
   manifest {

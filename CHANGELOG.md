@@ -1,6 +1,7 @@
 0.4
 * Added `gradlew`, so building does not require downloading Gradle first.
 * If permission is missing, default to allow, not deny.
+* Plugin is now generated.
 
 0.3
 * Change to random teleport algorithm to minimize (but not eliminate)
