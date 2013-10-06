@@ -61,7 +61,7 @@ The plugin uses [Vault][] to manage its permissions, which means it's
 compatible with all the permissions subsystems supported by Vault. Currently,
 there's only one permission, `RandomTeleport.rp`. If a player has that permission,
 he or she can randomly teleport. If the permission is missing, it defaults to
-"off".
+"allow".
 
 ## Getting the Plugin
 

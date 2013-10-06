@@ -100,7 +100,7 @@ class RandomTeleportPlugin
   }
 
   private def teleportIfAllowed(player: Player) {
-    if (PermissionUtil.playerHasPerm(player, "RandomTeleport.rp"))
+    if (PermissionUtil.playerHasPerm(player, "RandomTeleport.rp", true))
       teleport(player)
     else
       player.sendError("You aren't permitted to use that command.")
