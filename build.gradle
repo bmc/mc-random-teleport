@@ -46,7 +46,6 @@ dependencies {
   }
 }
 
-
 tasks.withType(ScalaCompile) {
   scalaCompileOptions.useAnt = false
   scalaCompileOptions.additionalParameters = ["-feature"]
@@ -86,6 +85,11 @@ task zipJars(type: Zip) {
 
   into "/mc-random-teleport"
 }
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.8'
+}
+
 jar {
   manifest {
     def manifestCP = ['../lib/mclib.jar',

@@ -69,12 +69,13 @@ Currently, the only way to get the plugin is to build it from source. To do
 that, you'll need the following:
 
 * A Java JDK (preferably Java 7).
-* A recent version of [Gradle](http://gradle.org).
 
 ### Building the Plugin
 
 * Check out the repo.
-* Run: `gradle zip`
+* Run: `./gradlew zip` (or, on Windows, `gradlew.bat zip`). The (local)
+  `gradlew` script will handle downloading the appropriate version of Gradle
+  and running the build.
 * The resulting distribution is in `build/distributions/mc-random-teleport-VERSION.zip`,
   where `VERSION` is the current version of the plugin.
 

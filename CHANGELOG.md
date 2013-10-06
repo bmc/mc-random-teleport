@@ -1,3 +1,6 @@
+0.4
+* Added `gradlew`, so building does not require downloading Gradle first.
+
 0.3
 * Change to random teleport algorithm to minimize (but not eliminate)
   the probability of teleporting into a cave, because teleporting above
