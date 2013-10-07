@@ -5,3 +5,7 @@ author: "@author@"
 version: @version@
 depend: [ScalaLibPlugin]
 load: "POSTWORLD"
+commands:
+  rp:
+    description: "Randomly teleport somewhere."
+    usage: "/rp"
