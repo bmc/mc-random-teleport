@@ -65,12 +65,17 @@ he or she can randomly teleport. If the permission is missing, it defaults to
 
 ## Getting the Plugin
 
-Currently, the only way to get the plugin is to build it from source. To do
-that, you'll need the following:
+You can either download a precompiled version of the plugin or compile it
+yourself.
 
-* A Java JDK (preferably Java 7).
+### Downloading the Plugin
+
+ You can download the compiled plugin from
+ <http://download.clapper.org/mc-random-teleport/>.
 
 ### Building the Plugin
+
+To build the plugin, you'll need a Java JDK (preferably Java 7).
 
 * Check out the repo.
 * Run: `./gradlew zip` (or, on Windows, `gradlew.bat zip`). The (local)
@@ -81,7 +86,7 @@ that, you'll need the following:
 
 ### Installing the Plugin
 
-Unpack the zip file you built above.  Unzipping will result in an
+Unpack the zip file you downloaded or built above.  Unzipping will result in an
 `mc-random-teleport` subdirectory containing numerous jar files. Assuming the
 top-level directory of your Minecraft world is `$WORLD`, issue the following
 commands. (These commands are suitable for Unix and Mac systems. If you're on
