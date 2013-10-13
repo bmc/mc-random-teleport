@@ -24,7 +24,7 @@ repositories {
 ext.author       = "Brian M. Clapper"
 ext.pluginName   = "RandomTeleport"
 ext.pluginClass  = "org.clapper.minecraft.randomteleport.RandomTeleportPlugin"
-ext.version      = "0.4"
+project.version  = "0.4"
 ext.pluginYaml   = "src/main/resources/plugin.yml"
 
 ext.mclibVersion = "0.6"
@@ -82,7 +82,7 @@ task zipCleanup(type: Delete) {
 }
 
 task zipJars(type: Zip) {
-  archiveName "mc-random-teleport-${project.ext.version}.zip"
+  archiveName "mc-random-teleport-${project.version}.zip"
   includeEmptyDirs false
   finalizedBy 'zipCleanup'
 
@@ -108,7 +108,7 @@ task createPluginYaml(type: Copy) {
   }
   into 'src/main/resources'
   filter(ReplaceTokens, tokens: [
-    version: project.ext.version,
+    version: project.version,
     name:    project.ext.pluginName,
     class:   project.ext.pluginClass,
     genTime: new Date().format("yyyy/MM/dd HH:mm:ss"),
