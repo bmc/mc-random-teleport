@@ -29,10 +29,11 @@ configurations {
 ext.author       = "Brian M. Clapper"
 ext.pluginName   = "RandomTeleport"
 ext.pluginClass  = "org.clapper.minecraft.randomteleport.RandomTeleportPlugin"
-version          = "0.4"
+version          = "0.5"
 ext.pluginYaml   = "src/main/resources/plugin.yml"
+ext.distDir      = file("build/distributions")
 
-ext.mclibVersion = "0.6"
+ext.mclibVersion = "0.8"
 
 dependencies {
   runtime "org.scala-lang:scala-library:2.10.2"
@@ -41,8 +42,8 @@ dependencies {
   // is (often) required to avoid weird compilation errors related to a
   // stub version included in the Bukket jar.
   compile "javax.servlet:servlet-api:2.5"
-  compile "org.bukkit:bukkit:1.6.4-R0.1-SNAPSHOT"
-  compile "org.bukkit:craftbukkit:1.6.4-R0.1-SNAPSHOT"
+  compile "org.bukkit:bukkit:1.7.9-R0.2-SNAPSHOT"
+  compile "org.bukkit:craftbukkit:1.7.9-R0.2-SNAPSHOT"
   compile "org.clapper.minecraft:mclib:${ext.mclibVersion}"
   compile "com.joshcough:scala-minecraft-plugin-api_2.10:0.3.2"
 
@@ -127,7 +128,7 @@ processResources.dependsOn('createPluginYaml')
 
 
 // Publish the zip file to the remote server.
-task publish(dependsOn: 'zip') {
+task publish(dependsOn: ['zip', 'distDir']) << {
 
   // Get the passphrase from the user.
   def console = System.console()
@@ -148,6 +149,12 @@ task publish(dependsOn: 'zip') {
     fileset(dir: 'build/distributions') {
       include(name: '*.zip')
     }
+  }
+}
+
+task distDir() {
+  doFirst {
+    project.ext.distDir.mkdirs()
   }
 }
 
