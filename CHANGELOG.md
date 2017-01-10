@@ -1,5 +1,9 @@
 # Change Log for mc-random-teleport
 
+Version 0.7.2
+
+* Updated to latest version of `mc-scala-plugin`.
+
 Version 0.7.1
 
 * Fixed incorrect location coordinates in message displayed to player.

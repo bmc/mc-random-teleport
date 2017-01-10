@@ -2,7 +2,7 @@
 // Basic settings
 
 name := "mc-random-teleport"
-version := "0.7.1"
+version := "0.7.2"
 organization := "org.clapper"
 licenses := Seq("BSD" -> url("http://software.clapper.org/grizzled-scala/license.html"))
 homepage := None
@@ -29,7 +29,7 @@ resolvers += "Spigot" at "https://hub.spigotmc.org/nexus/content/groups/public"
 
 libraryDependencies ++= Seq(
   "org.bukkit"   % "bukkit"          % "1.11.2-R0.1-SNAPSHOT" % "provided",
-  "org.clapper" %% "mc-scala-plugin" % "0.7.0"                % "provided",
+  "org.clapper" %% "mc-scala-plugin" % "0.8.0"                % "provided",
   "org.clapper" %% "grizzled-scala"  % "4.2.0"                % "provided"
 )
 
