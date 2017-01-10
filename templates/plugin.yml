@@ -9,8 +9,11 @@ commands:
   rp:
     description: "Randomly teleport somewhere."
     usage: "/rp"
-    permission: org.clapper.mcRandomTeleport
+    permission: org.clapper.mcRandomTeleport.enabled
 permissions:
-  org.clapper.mcRandomTeleport:
+  org.clapper.mcRandomTeleport.enabled:
     description: Whether or not you can use /rp
+    default: false
+  org.clapper.mcRandomTeleport.noDelay:
+    description: Whether or not you can bypass the delay.
     default: false

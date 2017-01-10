@@ -1,5 +1,14 @@
 # Change Log for mc-random-teleport
 
+Version 0.7.0
+
+* Changed primary permission to `org.clapper.mcRandomTeleport.enabled`.
+* Added `org.clapper.mcRandomTeleport.noDelay` permission (useful for admins
+  and testers).
+* Added `install` task to build, to install the jar in a Bukkit or Spigot
+  plugin directory. Requires environment variable `MC_PLUGIN_DIR` to be set
+  to point to the target directory.
+
 Version 0.6.3
 
 * Do not consider hollow blocks to be safe.

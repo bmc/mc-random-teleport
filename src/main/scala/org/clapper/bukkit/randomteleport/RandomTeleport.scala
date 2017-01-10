@@ -82,7 +82,8 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     val elapsed = now - lastTeleported
     logger.debug(s"timeBetween=${randomTeleportConfig.TimeBetweenTeleports}, " +
                  s"elapsed=$elapsed, last=$lastTeleported, now=$now")
-    if (elapsed < randomTeleportConfig.TimeBetweenTeleports) {
+    if ((! player.hasPermission("org.clapper.mcRandomTeleport.noDelay")) &&
+        (elapsed < randomTeleportConfig.TimeBetweenTeleports)) {
       val left = randomTeleportConfig.TimeBetweenTeleports - elapsed
       val leftSecs = (left / 1000) + (
         // Round up if there's ANY remainder.
@@ -129,8 +130,7 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
 
     val safeCoordinates = coordinates.filter { coord =>
-      val block = world.blockAt(coord)
-      block.isSafe && (! block.isHollow)
+      world.blockAt(coord).isSafeForPlayer
     }
 
     logger.debug(s"${safeCoordinates.length} non-water coordinates")
