@@ -1,5 +1,9 @@
 # Change Log for mc-random-teleport
 
+Version 0.7.1
+
+* Fixed incorrect location coordinates in message displayed to player.
+
 Version 0.7.0
 
 * Changed primary permission to `org.clapper.mcRandomTeleport.enabled`.

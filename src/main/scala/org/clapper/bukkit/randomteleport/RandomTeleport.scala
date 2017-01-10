@@ -95,8 +95,8 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
 
     else if (randomlyTeleport(world, player)) {
-      val loc = player.getLocation
-      val sLoc = s"(${loc.x.toInt}, ${loc.x.toInt}, ${loc.x.toInt})"
+      val loc = player.location
+      val sLoc = s"(${loc.x.toInt}, ${loc.y.toInt}, ${loc.z.toInt})"
       logger.debug(s"Teleported ${player.getName} to $sLoc")
       player.sendRawMessage(s"You have been teleported to $sLoc.")
       player.setMetadata(Constants.LastTimeMetadataKey,
