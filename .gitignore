@@ -4,3 +4,6 @@ build
 .gradle
 *.iml
 src/main/resources/plugin.yml
+/target
+/project/project
+/project/target

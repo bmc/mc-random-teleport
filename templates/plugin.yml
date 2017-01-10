@@ -1,11 +1,15 @@
-# Generated @genTime@
-name: @name@
-main: @class@
-author: "@author@"
-version: @version@
-depend: [ScalaLibPlugin]
+# Generated $date
+name: $name
+main: org.clapper.bukkit.randomteleport.RandomTeleportPlugin
+author: Brian M. Clapper
+version: $version
+depend: ["mc-scala-plugin"]
 load: "POSTWORLD"
 commands:
   rp:
     description: "Randomly teleport somewhere."
     usage: "/rp"
+permissions:
+  org.clapper.mcRandomTeleport:
+    description: Whether or not you can use /rp
+    default: false
