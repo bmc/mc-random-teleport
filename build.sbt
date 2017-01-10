@@ -29,7 +29,8 @@ resolvers += "Spigot" at "https://hub.spigotmc.org/nexus/content/groups/public"
 
 libraryDependencies ++= Seq(
   "org.bukkit"   % "bukkit"          % "1.11.2-R0.1-SNAPSHOT" % "provided",
-  "org.clapper" %% "mc-scala-plugin" % "0.2.0"                % "provided"
+  "org.clapper" %% "mc-scala-plugin" % "0.2.1"                % "provided",
+  "org.clapper" %% "grizzled-scala"  % "4.2.0"                % "provided"
 )
 
 // ---------------------------------------------------------------------------
@@ -57,10 +58,6 @@ assemblyMergeStrategy in assembly := { path =>
 
   path match {
     case PathList("scala", _ @ _*) =>
-      MergeStrategy.discard
-    case PathList("org", "clapper", "bukkit", "scalalib", _ @ _*) =>
-      MergeStrategy.discard
-    case PathList("org", "clapper", "bukkit", "scala", _ @ _*) =>
       MergeStrategy.discard
     case PathList("org", "clapper", "bukkit", "randomteleport", _ @ _*)  =>
       MergeStrategy.first
