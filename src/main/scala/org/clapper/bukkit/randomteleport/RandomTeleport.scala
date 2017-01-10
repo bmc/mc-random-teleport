@@ -11,14 +11,11 @@ import scala.util.Random
 import java.security.SecureRandom
 import java.util.logging.Level
 
-import org.bukkit.block.Block
 import org.bukkit.command.{Command, CommandSender}
-import org.bukkit.plugin.java.JavaPlugin
 
 import org.clapper.bukkit.scalalib.Coordinate
 import org.clapper.bukkit.scalalib.Implicits._
-
-import scala.annotation.tailrec
+import org.clapper.bukkit.scalalib.ScalaPlugin
 
 private[randomteleport] object Constants {
   val HeightDelta           = 10 // loc ok if lower than (max height - this)
@@ -42,16 +39,14 @@ private case class RTPMetaData(name: String, plugin: Plugin) extends MetadataVal
   def value           = name
 }
 
-final class RandomTeleportPlugin extends JavaPlugin {
-
-  private val logger = getLogger
+final class RandomTeleportPlugin extends ScalaPlugin {
 
   private lazy val random = SecureRandom.getInstance("SHA1PRNG", "SUN")
   // Force random number generator to seed itself. See
   // https://www.cigital.com/justice-league-blog/2009/08/14/proper-use-of-javas-securerandom/
   random.nextInt()
 
-  private lazy val config = Config(this)
+  private lazy val randomTeleportConfig = Config(this)
 
   override def onDisable(): Unit = {
     super.onDisable()
@@ -82,7 +77,7 @@ final class RandomTeleportPlugin extends JavaPlugin {
     super.onEnable()
     val dataDirectory = this.getDataFolder
     if (! dataDirectory.exists) {
-      logger.log(Level.INFO, s"Creating $dataDirectory")
+      logger.info(s"Creating $dataDirectory")
       dataDirectory.mkdirs()
     }
   }
@@ -93,11 +88,10 @@ final class RandomTeleportPlugin extends JavaPlugin {
 
     val lastTeleported = lastRandomTeleportTime(player)
     val elapsed = now - lastTeleported
-    logger.log(Level.FINEST,
-               s"timeBetween=${config.TimeBetweenTeleports}, " +
-               s"elapsed=$elapsed, last=$lastTeleported, now=$now")
-    if (elapsed < config.TimeBetweenTeleports) {
-      val left = config.TimeBetweenTeleports - elapsed
+    logger.debug(s"timeBetween=${randomTeleportConfig.TimeBetweenTeleports}, " +
+                 s"elapsed=$elapsed, last=$lastTeleported, now=$now")
+    if (elapsed < randomTeleportConfig.TimeBetweenTeleports) {
+      val left = randomTeleportConfig.TimeBetweenTeleports - elapsed
       val leftSecs = (left / 1000) + (
         // Round up if there's ANY remainder.
         if ((left % 1000) > 0) 1 else 0
@@ -109,20 +103,20 @@ final class RandomTeleportPlugin extends JavaPlugin {
     else if (randomlyTeleport(world, player)) {
       val loc = player.getLocation
       val sLoc = s"(${loc.x.toInt}, ${loc.x.toInt}, ${loc.x.toInt})"
-      logger.log(Level.FINEST, s"Teleported ${player.getName} to $sLoc")
+      logger.debug(s"Teleported ${player.getName} to $sLoc")
       player.sendRawMessage(s"You have been teleported to $sLoc.")
       player.setMetadata(Constants.LastTimeMetadataKey,
                          RTPMetaData(now.toString, this))
     }
 
     else {
-      logger.log(Level.SEVERE, s"Failed to teleport player ${player.getName}.")
+      logger.error(s"Failed to teleport player ${player.getName}.")
       player.sendMessage("Sorry, we are unable to teleport you at this time.")
     }
   }
 
   private def randomlyTeleport(world: World, player: Player): Boolean = {
-    val (min, max) = (config.MinCoordinate, config.MaxCoordinate)
+    val (min, max) = (randomTeleportConfig.MinCoordinate, randomTeleportConfig.MaxCoordinate)
 
     // Select N random coordinates. Then, weed out the ones whose highest
     // blocks are water. If there are any left, use one of them. Otherwise,
@@ -143,7 +137,7 @@ final class RandomTeleportPlugin extends JavaPlugin {
       world.blockAt(coord).isSafe
     }
 
-    logger.log(Level.FINEST, s"${safeCoordinates.length} non-water coordinates")
+    logger.debug(s"${safeCoordinates.length} non-water coordinates")
 
     val startingCoordinate = safeCoordinates.toList match {
       case Nil =>
@@ -161,7 +155,7 @@ final class RandomTeleportPlugin extends JavaPlugin {
     }
 
     val startingLoc = startingCoordinate.toLocation(world)
-    logger.log(Level.FINEST, s"Finding safe location from $startingLoc")
+    logger.debug(s"Finding safe location from $startingLoc")
     val loc = world.findSafeLocationFrom(startingLoc)
 
     player.teleport(loc)

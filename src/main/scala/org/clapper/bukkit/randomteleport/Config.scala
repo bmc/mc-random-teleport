@@ -1,6 +1,5 @@
 package org.clapper.bukkit.randomteleport
 
-import java.util.logging.Logger
 import org.bukkit.configuration.Configuration
 
 private[randomteleport] class Config(private val config: Configuration) {
@@ -27,7 +26,7 @@ private[randomteleport] object Config {
 
         case None => {
           plugin.saveDefaultConfig()
-          val cfg = new Config(plugin.getConfig)
+          val cfg = new Config(plugin.configuration)
           data = Some(cfg)
           cfg
         }
