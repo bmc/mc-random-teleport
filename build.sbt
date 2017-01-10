@@ -2,7 +2,7 @@
 // Basic settings
 
 name := "mc-random-teleport"
-version := "0.6.3"
+version := "0.7.0"
 organization := "org.clapper"
 licenses := Seq("BSD" -> url("http://software.clapper.org/grizzled-scala/license.html"))
 homepage := None
@@ -29,7 +29,7 @@ resolvers += "Spigot" at "https://hub.spigotmc.org/nexus/content/groups/public"
 
 libraryDependencies ++= Seq(
   "org.bukkit"   % "bukkit"          % "1.11.2-R0.1-SNAPSHOT" % "provided",
-  "org.clapper" %% "mc-scala-plugin" % "0.6.0"                % "provided",
+  "org.clapper" %% "mc-scala-plugin" % "0.7.0"                % "provided",
   "org.clapper" %% "grizzled-scala"  % "4.2.0"                % "provided"
 )
 
@@ -70,4 +70,26 @@ assemblyMergeStrategy in assembly := { path =>
     case x =>
       oldStrategy(x)
   }
+}
+
+// ---------------------------------------------------------------------------
+// install task
+
+addCommandAlias("install", ";editsource:clean;compile;assembly;installJar")
+
+val installJar = taskKey[Unit]("Copy the jar to the directory specified by $MC_PLUGIN_DIR")
+installJar := {
+  import grizzled.file.Implicits.GrizzledFile
+
+  val installDir = Option(System.getenv("MC_PLUGIN_DIR")).getOrElse {
+    throw new Exception("MC_PLUGIN_DIR environment variable isn't set.")
+  }
+
+  val jar = (assemblyOutputPath in assembly).value
+  if (! jar.exists) {
+    throw new Exception(s"$jar does not exist.")
+  }
+
+  println(s"cp $jar $target")
+  jar.copyTo(installDir).get
 }
