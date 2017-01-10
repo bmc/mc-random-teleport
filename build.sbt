@@ -2,7 +2,7 @@
 // Basic settings
 
 name := "mc-random-teleport"
-version := "0.6.2"
+version := "0.6.3"
 organization := "org.clapper"
 licenses := Seq("BSD" -> url("http://software.clapper.org/grizzled-scala/license.html"))
 homepage := None

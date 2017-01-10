@@ -1,5 +1,9 @@
 # Change Log for mc-random-teleport
 
+Version 0.6.3
+
+* Do not consider hollow blocks to be safe.
+
 Version 0.6.2
 
 * Permissions testing is now done via `Command.testPermission()`, which

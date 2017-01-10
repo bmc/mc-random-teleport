@@ -129,7 +129,8 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
 
     val safeCoordinates = coordinates.filter { coord =>
-      world.blockAt(coord).isSafe
+      val block = world.blockAt(coord)
+      block.isSafe && (! block.isHollow)
     }
 
     logger.debug(s"${safeCoordinates.length} non-water coordinates")
