@@ -20,7 +20,6 @@ import org.clapper.bukkit.scalalib.ScalaPlugin
 private[randomteleport] object Constants {
   val HeightDelta           = 10 // loc ok if lower than (max height - this)
   val LastTimeMetadataKey   = "last-random-teleport-time"
-  val CanRandomlyTeleport   = "org.clapper.mcRandomTeleport"
   val DefaultElapsedTime    = 60 * 60 * 1000 // 1 hour in milliseconds
   val TotalCoordinatesToTry = 20
 }
@@ -62,14 +61,7 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
 
     playerOpt.exists { player =>
-      if (player.hasPermission(Constants.CanRandomlyTeleport)) {
-        teleport(player)
-        true
-      }
-      else {
-        player.sendMessage("You are not permitted to use that command.")
-        false
-      }
+      command.testPermission(player) && teleport(player)
     }
   }
 
@@ -82,7 +74,7 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
   }
 
-  private def teleport(player: Player) {
+  private def teleport(player: Player): Boolean = {
     val world = player.world
     val now   = System.currentTimeMillis
 
@@ -98,6 +90,7 @@ final class RandomTeleportPlugin extends ScalaPlugin {
         )
       val humanLeft = if (leftSecs == 1) "a second" else s"another $leftSecs seconds"
       player.sendMessage(s"You can't randomly teleport for $humanLeft.")
+      false
     }
 
     else if (randomlyTeleport(world, player)) {
@@ -107,11 +100,13 @@ final class RandomTeleportPlugin extends ScalaPlugin {
       player.sendRawMessage(s"You have been teleported to $sLoc.")
       player.setMetadata(Constants.LastTimeMetadataKey,
                          RTPMetaData(now.toString, this))
+      true
     }
 
     else {
       logger.error(s"Failed to teleport player ${player.getName}.")
       player.sendMessage("Sorry, we are unable to teleport you at this time.")
+      false
     }
   }
 

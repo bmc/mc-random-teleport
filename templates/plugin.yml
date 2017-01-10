@@ -9,6 +9,7 @@ commands:
   rp:
     description: "Randomly teleport somewhere."
     usage: "/rp"
+    permission: org.clapper.mcRandomTeleport
 permissions:
   org.clapper.mcRandomTeleport:
     description: Whether or not you can use /rp

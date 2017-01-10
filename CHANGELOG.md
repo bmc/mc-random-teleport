@@ -1,5 +1,11 @@
 # Change Log for mc-random-teleport
 
+Version 0.6.2
+
+* Permissions testing is now done via `Command.testPermission()`, which
+  leverages the plugin.yml file and reduces duplication.
+* Fixed permission configuration in plugin.yml
+
 Version 0.6.1
 
 * Updated to latest version of `mc-scala-plugin`.
