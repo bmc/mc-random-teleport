@@ -1,3 +1,7 @@
+0.5.0, 0.5.1, 0.5.2
+
+* Updated to 1.11 and rewritten to use new (personal) Scala helper libraries.
+
 0.5
 * Updated to 1.7.9
 
