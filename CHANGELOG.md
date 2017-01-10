@@ -1,3 +1,6 @@
+0.5
+* Updated to 1.7.9
+
 0.4
 * Added `gradlew`, so building does not require downloading Gradle first.
 * If permission is missing, default to allow, not deny.
