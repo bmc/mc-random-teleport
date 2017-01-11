@@ -1,12 +1,40 @@
 package org.clapper.bukkit.randomteleport
 
 import org.bukkit.configuration.Configuration
+import org.clapper.bukkit.scalalib.ScalaLogger
+import org.clapper.bukkit.scalalib.Implicits._
 
-private[randomteleport] class Config(private val config: Configuration) {
-  val MaxCoordinate        = getInt("max", 10000)
-  val MinCoordinate        = getInt("min", -10000)
-  val MaxAttempts          = getInt("maxAttempts", 30)
-  val TimeBetweenTeleports = getInt("timeBetweenTeleports", 120) * 1000
+import scala.concurrent.duration._
+
+private[randomteleport] class Config(private val config: Configuration,
+                                     private val log:    ScalaLogger) {
+  val maxCoordinate        = getInt("max", 10000)
+  val minCoordinate        = getInt("min", -10000)
+  val maxAttempts          = getInt("maxAttempts", 30)
+
+  val DefaultDelay         = 3.seconds
+
+  val teleportDelay: Duration = config
+    .getDuration("teleportDelay", DefaultDelay)
+    .recover {
+      case e: Exception =>
+        log.error(e.getMessage)
+        log.error(s"Assuming default of $DefaultDelay")
+        DefaultDelay
+    }
+    .get
+
+  // Milliseconds.
+  val timeBetweenTeleports: Long = config
+    .getDuration("timeBetweenTeleports", DefaultDelay)
+    .recover {
+      case e: Exception =>
+        log.error(e.getMessage)
+        log.error(s"Assuming default of $DefaultDelay")
+        DefaultDelay
+    }
+    .get
+    .toMillis
 
   private def getInt(key: String, default: Int): Int = {
     val res = config.getInt(key)
@@ -26,7 +54,7 @@ private[randomteleport] object Config {
 
         case None => {
           plugin.saveDefaultConfig()
-          val cfg = new Config(plugin.configuration)
+          val cfg = new Config(plugin.configuration, plugin.logger)
           data = Some(cfg)
           cfg
         }

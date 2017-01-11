@@ -1,5 +1,11 @@
 # Change Log for mc-random-teleport
 
+Version 0.8.0
+
+* The teleport operation is now subject to a configured delay (defaulting to
+  3 seconds), which can be overridden by a permission.
+* Updated to latest version of `mc-scala-plugin`.
+  
 Version 0.7.2 and 0.7.3
 
 * Updated to latest version of `mc-scala-plugin`.

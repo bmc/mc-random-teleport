@@ -17,4 +17,22 @@ maxAttempts: 30
 
 # Cool-down period: The minimum time between teleports, expressed in seconds.
 # Each user has a separate cool-down period.
-timeBetweenTeleports: 120 # two minutes
+#
+# This string is a duration. Valid values are of the form
+# "<integer> <time-unit>". For example:
+#
+#   "1 second"
+#   "3 seconds"
+#   "1 hour" (!)
+#   "600 milliseconds"
+timeBetweenTeleports: "2 minutes"
+
+# How long to wait before teleporting a player (assuming the player doesn't
+# have the "noDelay" permission). This string is a duration. Valid values are
+# of the form "<integer> <time-unit>". For example:
+#
+#   "1 second"
+#   "3 seconds"
+#   "1 hour" (!)
+#   "600 milliseconds"
+teleportDelay: "3 seconds"

@@ -14,6 +14,6 @@ permissions:
   org.clapper.mcRandomTeleport.enabled:
     description: Whether or not you can use /rp
     default: false
-  org.clapper.mcRandomTeleport.noDelay:
-    description: Whether or not you can bypass the delay.
+  org.clapper.mcRandomTeleport.immediate:
+    description: "Whether or not you can teleport immediately, always."
     default: false

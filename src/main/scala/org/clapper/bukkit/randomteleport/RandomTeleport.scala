@@ -22,6 +22,7 @@ private[randomteleport] object Constants {
   val LastTimeMetadataKey   = "last-random-teleport-time"
   val DefaultElapsedTime    = 60 * 60 * 1000 // 1 hour in milliseconds
   val TotalCoordinatesToTry = 20
+  val ImmediatePermission   = "org.clapper.mcRandomTeleport.immediate"
 }
 
 private case class RTPMetaData(name: String, plugin: Plugin) extends MetadataValue {
@@ -80,39 +81,34 @@ final class RandomTeleportPlugin extends ScalaPlugin {
 
     val lastTeleported = lastRandomTeleportTime(player)
     val elapsed = now - lastTeleported
-    logger.debug(s"timeBetween=${randomTeleportConfig.TimeBetweenTeleports}, " +
+    logger.debug(s"timeBetween=${randomTeleportConfig.timeBetweenTeleports}, " +
                  s"elapsed=$elapsed, last=$lastTeleported, now=$now")
-    if ((! player.hasPermission("org.clapper.mcRandomTeleport.noDelay")) &&
-        (elapsed < randomTeleportConfig.TimeBetweenTeleports)) {
-      val left = randomTeleportConfig.TimeBetweenTeleports - elapsed
+
+println(s"Player has ${Constants.ImmediatePermission} ? ${player.hasPermission(Constants.ImmediatePermission)}")
+println(s"Elapsed: $elapsed, timeBetween=${randomTeleportConfig.timeBetweenTeleports}")
+
+    if ((! player.hasPermission(Constants.ImmediatePermission)) &&
+        (elapsed < randomTeleportConfig.timeBetweenTeleports)) {
+
+      val left = randomTeleportConfig.timeBetweenTeleports - elapsed
       val leftSecs = (left / 1000) + (
         // Round up if there's ANY remainder.
         if ((left % 1000) > 0) 1 else 0
         )
       val humanLeft = if (leftSecs == 1) "a second" else s"another $leftSecs seconds"
       player.sendMessage(s"You can't randomly teleport for $humanLeft.")
-      false
-    }
-
-    else if (randomlyTeleport(world, player)) {
-      val loc = player.location
-      val sLoc = s"(${loc.x.toInt}, ${loc.y.toInt}, ${loc.z.toInt})"
-      logger.debug(s"Teleported ${player.getName} to $sLoc")
-      player.sendRawMessage(s"You have been teleported to $sLoc.")
-      player.setMetadata(Constants.LastTimeMetadataKey,
-                         RTPMetaData(now.toString, this))
-      true
     }
 
     else {
-      logger.error(s"Failed to teleport player ${player.getName}.")
-      player.sendMessage("Sorry, we are unable to teleport you at this time.")
-      false
+      randomlyTeleport(world, player)
     }
+
+    true
   }
 
-  private def randomlyTeleport(world: World, player: Player): Boolean = {
-    val (min, max) = (randomTeleportConfig.MinCoordinate, randomTeleportConfig.MaxCoordinate)
+  private def randomlyTeleport(world: World, player: Player): Unit = {
+    val (min, max) = (randomTeleportConfig.minCoordinate,
+                      randomTeleportConfig.maxCoordinate)
 
     // Select N random coordinates. Then, weed out the ones whose highest
     // blocks are water. If there are any left, use one of them. Otherwise,
@@ -154,7 +150,25 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     logger.debug(s"Finding safe location from $startingLoc")
     val loc = world.findSafeLocationFrom(startingLoc)
 
-    player.teleport(loc)
+    val sLoc = s"(${loc.x.toInt}, ${loc.y.toInt}, ${loc.z.toInt})"
+    val arrivalMessage = s"You have been teleported to $sLoc."
+    if (player.hasPermission(Constants.ImmediatePermission)) {
+      player.teleport(loc)
+      player.sendMessage(arrivalMessage)
+    }
+    else {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      teleportPlayerAfterDelay(player   = player,
+                               location = loc,
+                               delay    = randomTeleportConfig.teleportDelay,
+                               message  = arrivalMessage)
+        .onSuccess {
+          case _ =>
+            player.setMetadata(Constants.LastTimeMetadataKey,
+              RTPMetaData(System.currentTimeMillis.toString, this))
+        }
+
+    }
   }
 
   private def lastRandomTeleportTime(player: Player) = {
