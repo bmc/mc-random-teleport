@@ -1,6 +1,6 @@
 # Change Log for mc-random-teleport
 
-Version 0.7.2
+Version 0.7.2 and 0.7.3
 
 * Updated to latest version of `mc-scala-plugin`.
 
