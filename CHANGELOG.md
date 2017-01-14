@@ -1,5 +1,10 @@
 # Change Log for mc-random-teleport
 
+Version 0.9.0
+
+* Now uses new `CommandPlugin` superclass, which simplifies handling.
+* Changed metadata class to use `MetadataValueAdapter`, for simplicity.
+
 Version 0.8.0
 
 * The teleport operation is now subject to a configured delay (defaulting to

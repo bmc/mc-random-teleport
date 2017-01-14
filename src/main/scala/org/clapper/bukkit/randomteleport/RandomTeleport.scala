@@ -1,21 +1,18 @@
 package org.clapper.bukkit.randomteleport
 
 import org.bukkit.entity.Player
-import org.bukkit.metadata.MetadataValue
+import org.bukkit.metadata.{MetadataValue, MetadataValueAdapter}
 import org.bukkit.plugin.Plugin
-import org.bukkit.{Location, Material, World}
+import org.bukkit.World
 
 import scala.language.implicitConversions
 import scala.collection.JavaConverters._
 import scala.util.Random
 import java.security.SecureRandom
-import java.util.logging.Level
 
 import org.bukkit.command.{Command, CommandSender}
-
-import org.clapper.bukkit.scalalib.Coordinate
+import org.clapper.bukkit.scalalib.{CommandPlugin, Coordinate, ScalaPlugin}
 import org.clapper.bukkit.scalalib.Implicits._
-import org.clapper.bukkit.scalalib.ScalaPlugin
 
 private[randomteleport] object Constants {
   val HeightDelta           = 10 // loc ok if lower than (max height - this)
@@ -25,21 +22,15 @@ private[randomteleport] object Constants {
   val ImmediatePermission   = "org.clapper.mcRandomTeleport.immediate"
 }
 
-private case class RTPMetaData(name: String, plugin: Plugin) extends MetadataValue {
-  def asBoolean       = false
-  def asByte          = 0
-  def asDouble        = 0.0
-  def asFloat         = 0.0f
-  def asInt           = 0
-  def asLong          = 0L
-  def asShort         = 0.asInstanceOf[Short]
-  def asString        = name
-  def getOwningPlugin = plugin
-  def invalidate      = ()
-  def value           = name
+private case class RTPMetaData(name: String, plugin: Plugin)
+  extends MetadataValueAdapter(plugin) {
+
+  def value(): AnyRef = name
+
+  def invalidate(): Unit = ()
 }
 
-final class RandomTeleportPlugin extends ScalaPlugin {
+final class RandomTeleportPlugin extends CommandPlugin {
 
   private lazy val random = SecureRandom.getInstance("SHA1PRNG", "SUN")
   // Force random number generator to seed itself. See
@@ -48,22 +39,12 @@ final class RandomTeleportPlugin extends ScalaPlugin {
 
   private lazy val randomTeleportConfig = Config(this)
 
+  val commands = Map(
+    "rp" -> cmdRandomTeleport _
+  )
+
   override def onDisable(): Unit = {
     super.onDisable()
-  }
-
-  override def onCommand(sender:  CommandSender,
-                         command: Command,
-                         alias:   String,
-                         args:    Array[String]): Boolean = {
-    val playerOpt: Option[Player] = sender match {
-      case p: Player => Some(p)
-      case _         => None
-    }
-
-    playerOpt.exists { player =>
-      command.testPermission(player) && teleport(player)
-    }
   }
 
   override def onEnable(): Unit = {
@@ -75,7 +56,14 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     }
   }
 
-  private def teleport(player: Player): Boolean = {
+  // --------------------------------------------------------------------------
+  // Private methods
+  // --------------------------------------------------------------------------
+
+  private def cmdRandomTeleport(command:  Command,
+                                alias:    String,
+                                player:   Player,
+                                args:     Array[String]): Unit = {
     val world = player.world
     val now   = System.currentTimeMillis
 
@@ -83,9 +71,6 @@ final class RandomTeleportPlugin extends ScalaPlugin {
     val elapsed = now - lastTeleported
     logger.debug(s"timeBetween=${randomTeleportConfig.timeBetweenTeleports}, " +
                  s"elapsed=$elapsed, last=$lastTeleported, now=$now")
-
-println(s"Player has ${Constants.ImmediatePermission} ? ${player.hasPermission(Constants.ImmediatePermission)}")
-println(s"Elapsed: $elapsed, timeBetween=${randomTeleportConfig.timeBetweenTeleports}")
 
     if ((! player.hasPermission(Constants.ImmediatePermission)) &&
         (elapsed < randomTeleportConfig.timeBetweenTeleports)) {
@@ -102,8 +87,6 @@ println(s"Elapsed: $elapsed, timeBetween=${randomTeleportConfig.timeBetweenTelep
     else {
       randomlyTeleport(world, player)
     }
-
-    true
   }
 
   private def randomlyTeleport(world: World, player: Player): Unit = {
@@ -161,7 +144,7 @@ println(s"Elapsed: $elapsed, timeBetween=${randomTeleportConfig.timeBetweenTelep
       teleportPlayerAfterDelay(player   = player,
                                location = loc,
                                delay    = randomTeleportConfig.teleportDelay,
-                               message  = arrivalMessage)
+                               message  = Some(arrivalMessage))
         .onSuccess {
           case _ =>
             player.setMetadata(Constants.LastTimeMetadataKey,
