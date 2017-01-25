@@ -25,12 +25,16 @@ scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 // ---------------------------------------------------------------------------
 // Deps
 
-resolvers += "Spigot" at "https://hub.spigotmc.org/nexus/content/groups/public"
+resolvers ++= Seq(
+  "Spigot" at "https://hub.spigotmc.org/nexus/content/groups/public",
+  "vault" at "http://nexus.hc.to/content/repositories/pub_releases"
+)
 
 libraryDependencies ++= Seq(
-  "org.bukkit"   % "bukkit"          % "1.11.2-R0.1-SNAPSHOT" % "provided",
-  "org.clapper" %% "mc-scala-plugin" % "0.11.0-SNAPSHOT"      % "provided",
-  "org.clapper" %% "grizzled-scala"  % "4.2.0"                % "provided"
+  "org.bukkit"          % "bukkit"          % "1.11.2-R0.1-SNAPSHOT" % Provided,
+  "org.clapper"        %% "mc-scala-plugin" % "0.11.0-SNAPSHOT"      % Provided,
+  "org.clapper"        %% "grizzled-scala"  % "4.2.0"                % Provided,
+  "net.milkbowl.vault"  % "VaultAPI"        % "1.6"                  % Provided
 )
 
 // ---------------------------------------------------------------------------

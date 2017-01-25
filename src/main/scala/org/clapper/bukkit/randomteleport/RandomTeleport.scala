@@ -19,7 +19,7 @@ private[randomteleport] object Constants {
   val LastTimeMetadataKey   = "last-random-teleport-time"
   val DefaultElapsedTime    = 60 * 60 * 1000 // 1 hour in milliseconds
   val TotalCoordinatesToTry = 20
-  val ImmediatePermission   = "org.clapper.mcRandomTeleport.immediate"
+  val ImmediatePermission   = "org.clapper.randomTeleport.immediate"
 }
 
 private case class RTPMetaData(name: String, plugin: Plugin)
