@@ -66,7 +66,6 @@ final class RandomTeleportPlugin extends CommandPlugin {
                                 args:     Array[String]): Unit = {
     val world = player.world
     val now   = System.currentTimeMillis
-
     val lastTeleported = lastRandomTeleportTime(player)
     val elapsed = now - lastTeleported
     logger.debug(s"timeBetween=${randomTeleportConfig.timeBetweenTeleports}, " +
